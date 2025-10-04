@@ -1,6 +1,6 @@
 services:
   app:
-    image: meu-app/laravel:test
+    image: my-app/laravel:test
     depends_on:
       mysql:
         condition: service_healthy
