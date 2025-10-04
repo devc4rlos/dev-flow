@@ -1,0 +1,11 @@
+.git
+.github
+.env
+.editorconfig
+Dockerfile
+compose.yaml
+README.md
+vendor/
+node_modules/
+public/hot
+storage/*.log
