@@ -1,0 +1,61 @@
+name: "Laravel CI"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - 'feature/**'
+
+permissions:
+  contents: read
+
+jobs:
+  laravel-tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build test image with cache
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          tags: my-app/laravel:test
+          load: true
+          build-args: |
+            COMPOSER_CACHE_VERSION=${{ hashFiles('composer.lock') }}
+            NPM_CACHE_VERSION=${{ hashFiles('package-lock.json') }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run Tests with Docker Compose
+        env:
+          APP_KEY_CI: ${{ secrets.APP_KEY_CI }}
+        run: |
+          set -e
+          
+          if [ -z "$APP_KEY_CI" ]; then
+            echo "Error: APP_KEY_CI is not defined!"
+            exit 1
+          fi
+          
+          DOCKER_COMPOSE="docker compose -f compose.ci.yaml -p ci"
+
+          trap 'echo "--- docker compose ps ---"; $DOCKER_COMPOSE ps || true; echo "--- docker compose logs (last 200 lines) ---"; $DOCKER_COMPOSE logs --no-color --tail=200 || true; echo "--- cleaning up ---"; $DOCKER_COMPOSE down -v --remove-orphans' EXIT
+          
+          cp .env.ci .env
+          
+          sed -i "s|APP_KEY=.*|APP_KEY=${APP_KEY_CI}|" .env
+          export $(grep -v '^#' .env | xargs)
+
+          $DOCKER_COMPOSE up -d --wait
+          
+          $DOCKER_COMPOSE cp .env app:/var/www/.env
+          
+          $DOCKER_COMPOSE exec app php artisan migrate:fresh --seed --force
+          $DOCKER_COMPOSE exec app php artisan test
+          
+          $DOCKER_COMPOSE down -v --remove-orphans
