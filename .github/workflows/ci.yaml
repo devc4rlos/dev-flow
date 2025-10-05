@@ -16,5 +16,9 @@ permissions:
 jobs:
   laravel-tests:
     uses: ./.github/workflows/reusable-ci.yaml
+    if: |
+      (
+      !contains(github.event.pull_request.labels.*.name, vars.DEPLOY_PREVIEW_LABEL)
+      )
     secrets:
       APP_KEY_CI: ${{ secrets.APP_KEY_CI }}
