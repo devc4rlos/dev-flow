@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  laravel-tests:
+  laravel-tests-reusable:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
