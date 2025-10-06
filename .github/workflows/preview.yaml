@@ -4,6 +4,9 @@ on:
   pull_request:
     types: [ opened, synchronize, reopened, closed, labeled, unlabeled ]
 
+env:
+  PR_NUMBER: ${{ github.event.pull_request.number }}
+
 permissions:
   contents: read
 
@@ -34,9 +37,44 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ laravel-tests ]
     steps:
-      - name: Run build image
-        run: |
-          echo "✅ build image successfully created!"
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ github.repository }}
+          tags: |
+            type=raw,value=pr-${{ env.PR_NUMBER }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          target: php
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: |
+            br.com.carlosalexandre.preview.pr.${{ vars.PROJECT_NAME }}=${{ env.PR_NUMBER }}
+            br.com.carlosalexandre.preview.general-${{ vars.PROJECT_NAME }}=true
+          build-args: |
+            COMPOSER_CACHE_KEY=${{ hashFiles('composer.lock') }}
+            NPM_CACHE_KEY=${{ hashFiles('package-lock.json') }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   deploy_preview:
     runs-on: ubuntu-latest
@@ -46,7 +84,7 @@ jobs:
     steps:
       - name: Run deploy environment preview
         run: |
-          echo "✅ deploy environment preview successfully created!"
+          echo "✅ preview environment deployed successfully!"
 
   destroy_preview:
     runs-on: ubuntu-latest
@@ -66,4 +104,17 @@ jobs:
     steps:
       - name: Run destroy environment preview
         run: |
-          echo "✅ destroy environment preview successfully created!"
+          echo "✅ preview environment destroyed successfully!"
+
+      - name: Install and Login to regctl
+        run: |
+          curl -L https://github.com/regclient/regclient/releases/latest/download/regctl-linux-amd64 -o /usr/local/bin/regctl
+          chmod +x /usr/local/bin/regctl
+          regctl registry login docker.io -u "${{ secrets.DOCKERHUB_USERNAME }}" -p "${{ secrets.DOCKERHUB_TOKEN }}"
+
+      - name: Delete PR-prefixed tag from Docker Hub
+        run: |
+          REPO="docker.io/${{ github.repository }}"
+          PR_TAG="pr-${{ env.PR_NUMBER }}"
+          echo "Removing PR tag: ${PR_TAG}"
+          regctl tag rm "${REPO}:${PR_TAG}" || echo "Tag ${PR_TAG} not found."
