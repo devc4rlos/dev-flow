@@ -71,8 +71,8 @@ jobs:
             br.com.carlosalexandre.preview.pr.${{ vars.PROJECT_NAME }}=${{ env.PR_NUMBER }}
             br.com.carlosalexandre.preview.general-${{ vars.PROJECT_NAME }}=true
           build-args: |
-            COMPOSER_CACHE_KEY=${{ hashFiles('composer.lock') }}
-            NPM_CACHE_KEY=${{ hashFiles('package-lock.json') }}
+            COMPOSER_CACHE_VERSION=${{ hashFiles('composer.lock') }}
+            NPM_CACHE_VERSION=${{ hashFiles('package-lock.json') }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
