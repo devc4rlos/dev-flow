@@ -1,0 +1,1 @@
+echo "✅ preview environment destroyed successfully!"
