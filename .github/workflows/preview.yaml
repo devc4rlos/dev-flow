@@ -81,10 +81,45 @@ jobs:
     needs: [ laravel-tests, build_image ]
     environment:
       name: Preview
+    permissions:
+      pull-requests: write
     steps:
-      - name: Run deploy environment preview
-        run: |
-          echo "✅ preview environment deployed successfully!"
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            export PR_NUMBER=${{ env.PR_NUMBER }}
+            export PROJECT_NAME=${{ vars.PROJECT_NAME }}
+            export IMAGE_TAG=pr-${{ env.PR_NUMBER }}
+            export REPO_FULL_NAME=${{ github.repository }}
+            export COMMIT_SHA=${{ github.event.pull_request.head.sha }}
+            export PROJECT_DIR=/var/www/$PROJECT_NAME/previews/pr-${{ env.PR_NUMBER }}
+            
+            if [ ! -d "$PROJECT_DIR" ]; then
+              echo "Cloning repository for the first time at ${PROJECT_DIR}..."
+              git clone "git@github.com:${REPO_FULL_NAME}.git" "${PROJECT_DIR}"
+            fi
+            
+            cd "${PROJECT_DIR}"
+            
+            git fetch origin
+            git checkout "${COMMIT_SHA}"
+            
+            bash $PROJECT_DIR/deploy/preview/deploy-preview.sh
+
+      - name: Post Preview URL to PR
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          number: ${{ env.PR_NUMBER }}
+          header: preview-url
+          message: |
+            ✅ **Preview ready!**
+            Access it at: https://${{ vars.PROJECT_NAME }}-pr-${{ env.PR_NUMBER }}.preview.carlosalexandre.com.br
+
+            > Image: `${{ github.repository }}:pr-${{ env.PR_NUMBER }}`
 
   destroy_preview:
     runs-on: ubuntu-latest
