@@ -97,10 +97,10 @@ jobs:
             export PROJECT_NAME=${{ vars.PROJECT_NAME }}
             export IMAGE_TAG=pr-${{ env.PR_NUMBER }}
             export PROJECT_DIR=/var/www/$PROJECT_NAME/previews/pr-${{ env.PR_NUMBER }}
-            export FRIST_TIME=false
+            export FIRST_TIME=false
             
             if [ ! -d "$PROJECT_DIR" ]; then
-              export FRIST_TIME=true
+              export FIRST_TIME=true
               echo "Cloning repository for the first time at ${PROJECT_DIR}..."
               git clone "git@github.com:${REPO_FULL_NAME}.git" "${PROJECT_DIR}"
             fi

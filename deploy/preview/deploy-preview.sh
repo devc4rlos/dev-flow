@@ -6,6 +6,7 @@ set -euo pipefail
 : "${COMMIT_SHA:?The COMMIT_SHA variable has not been set.}"
 : "${PROJECT_DIR:?The PROJECT_DIR variable has not been set.}"
 : "${PROJECT_NAME:?The PROJECT_NAME variable has not been set.}"
+: "${FIRST_TIME:?The FIRST_TIME variable has not been set.}"
 
 export HOSTNAME="${PROJECT_NAME}-pr-${PR_NUMBER}.preview.carlosalexandre.com.br"
 export ROUTER_NAME="${PROJECT_NAME}-pr-${PR_NUMBER}"
