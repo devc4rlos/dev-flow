@@ -25,6 +25,10 @@ if $FIRST_TIME; then
   ln -s ~/.htpasswd ./docker/nginx/.htpasswd || true
 fi
 
+sed -i "s|APP_KEY=.*|APP_KEY=${APP_KEY_CI}|" .env
+# shellcheck disable=SC2046
+export $(grep -v '^#' .env | xargs)
+
 echo "Updating repository to commit ${COMMIT_SHA}..."
 git fetch origin
 git checkout "${COMMIT_SHA}"
