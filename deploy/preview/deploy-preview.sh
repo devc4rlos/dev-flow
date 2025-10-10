@@ -8,10 +8,11 @@ set -euo pipefail
 : "${PROJECT_NAME:?The PROJECT_NAME variable has not been set.}"
 : "${FIRST_TIME:?The FIRST_TIME variable has not been set.}"
 
+export SERVICE_NAME="${PROJECT_NAME}-pr-${PR_NUMBER}"
 export HOSTNAME="${PROJECT_NAME}-pr-${PR_NUMBER}.preview.carlosalexandre.com.br"
 export ROUTER_NAME="${PROJECT_NAME}-pr-${PR_NUMBER}"
 
-trap 'echo "--- docker compose ps ---"; docker compose -f compose.preview.yaml -p ${PROJECT_NAME} ps || true; echo "--- docker compose logs (last 200 lines) ---"; docker compose -f compose.preview.yaml -p ${PROJECT_NAME} logs --no-color --tail=200 || true' ERR
+trap 'echo "--- docker compose ps ---"; docker compose -f compose.preview.yaml -p ${SERVICE_NAME} ps || true; echo "--- docker compose logs (last 200 lines) ---"; docker compose -f compose.preview.yaml -p ${SERVICE_NAME} logs --no-color --tail=200 || true' ERR
 
 echo "Starting deployment for PR #${PR_NUMBER}..."
 
@@ -29,18 +30,18 @@ echo "Updating repository to commit ${COMMIT_SHA}..."
 git fetch origin
 git checkout "${COMMIT_SHA}"
 
-docker compose -f compose.preview.yaml -p "${PROJECT_NAME}" pull app
+docker compose -f compose.preview.yaml -p "${SERVICE_NAME}" pull app
 
 echo "Starting containers with image ${IMAGE_TAG}..."
-docker compose -f compose.preview.yaml -p "${PROJECT_NAME}" up -d --wait --pull=always
+docker compose -f compose.preview.yaml -p "${SERVICE_NAME}" up -d --wait --pull=always
 
-docker compose -f compose.preview.yaml -p "${PROJECT_NAME}" up -d --no-deps nginx --force-recreate
+docker compose -f compose.preview.yaml -p "${SERVICE_NAME}" up -d --no-deps nginx --force-recreate
 
 echo "Running migrations..."
-if ! docker compose -f compose.preview.yaml -p "${PROJECT_NAME}" exec -T app php artisan migrate --force; then
+if ! docker compose -f compose.preview.yaml -p "${SERVICE_NAME}" exec -T app php artisan migrate --force; then
   echo "Migrations failed, retrying in 5s..."
   sleep 5
-  docker compose -f compose.preview.yaml -p "${PROJECT_NAME}" exec -T app php artisan migrate --force
+  docker compose -f compose.preview.yaml -p "${SERVICE_NAME}" exec -T app php artisan migrate --force
 fi
 echo "✅ Migrations completed."
 
