@@ -5,8 +5,9 @@ set -euo pipefail
 : "${PROJECT_DIR:?The PROJECT_DIR variable has not been set.}"
 : "${PROJECT_NAME:?The PROJECT_NAME variable has not been set.}"
 
-SERVICE_NAME="${PROJECT_NAME}-pr-${PR_NUMBER}"
-ROUTER_NAME="${PROJECT_NAME}-pr-${PR_NUMBER}"
+export SERVICE_NAME="${PROJECT_NAME}-pr-${PR_NUMBER}"
+export HOSTNAME="${PROJECT_NAME}-pr-${PR_NUMBER}.preview.carlosalexandre.com.br"
+export ROUTER_NAME="${PROJECT_NAME}-pr-${PR_NUMBER}"
 
 echo "Starting teardown of environment for PR #${PR_NUMBER}..."
 
