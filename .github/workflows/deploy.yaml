@@ -18,8 +18,6 @@ jobs:
   build-image:
     runs-on: ubuntu-latest
     needs: [ laravel-tests ]
-    outputs:
-      tags: ${{ steps.meta.outputs.tags }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -66,5 +64,19 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            export IMAGE_TAG=${{ needs.build-image.outputs.tags }}
-            echo "🚀 Deploying image: $IMAGE_TAG"
+            export IMAGE_TAG="${{ github.ref_name }}"
+            export PROJECT_NAME=${{ vars.PROJECT_NAME }}
+            export PROJECT_DIR=/var/www/$PROJECT_NAME
+            export COMMIT_SHA="${{ github.sha }}"
+            
+            export SERVICE_NAME=${PROJECT_NAME}
+            export HOSTNAME="${PROJECT_NAME}.carlosalexandre.com.br"
+            export ROUTER_NAME="${PROJECT_NAME}"
+            export COMPOSE_FILE="compose.production.yaml"
+            
+            cd $PROJECT_DIR || exit 1
+            
+            git fetch origin
+            git checkout "${COMMIT_SHA}"
+            
+            bash $PROJECT_DIR/deploy/production/deploy-production.sh
