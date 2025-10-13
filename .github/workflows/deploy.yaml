@@ -13,7 +13,7 @@ jobs:
   laravel-tests:
     if: |
       github.event.base_ref == 'refs/heads/main'
-      && github.event.base_ref == 'refs/heads/feature/create-production-workflow-flow-only-for-tag-push'
+      || github.event.base_ref == 'refs/heads/feature/create-production-workflow-flow-only-for-tag-push'
     uses: ./.github/workflows/reusable-ci.yaml
     secrets:
       APP_KEY_CI: ${{ secrets.APP_KEY_CI }}
