@@ -91,14 +91,16 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
+            REPO_FULL_NAME=${{ github.repository }}
             export PR_NUMBER=${{ env.PR_NUMBER }}
+            export COMMIT_SHA=${{ github.event.pull_request.head.sha }}
             export PROJECT_NAME=${{ vars.PROJECT_NAME }}
             export IMAGE_TAG=pr-${{ env.PR_NUMBER }}
-            export REPO_FULL_NAME=${{ github.repository }}
-            export COMMIT_SHA=${{ github.event.pull_request.head.sha }}
             export PROJECT_DIR=/var/www/$PROJECT_NAME/previews/pr-${{ env.PR_NUMBER }}
+            export FIRST_TIME=false
             
             if [ ! -d "$PROJECT_DIR" ]; then
+              export FIRST_TIME=true
               echo "Cloning repository for the first time at ${PROJECT_DIR}..."
               git clone "git@github.com:${REPO_FULL_NAME}.git" "${PROJECT_DIR}"
             fi

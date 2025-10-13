@@ -1,1 +1,65 @@
-echo "✅ preview environment deployed successfully!"
+#!/bin/bash
+set -euo pipefail
+
+: "${PR_NUMBER:?The PR_NUMBER variable has not been set.}"
+: "${IMAGE_TAG:?The IMAGE_TAG variable has not been set.}"
+: "${COMMIT_SHA:?The COMMIT_SHA variable has not been set.}"
+: "${PROJECT_DIR:?The PROJECT_DIR variable has not been set.}"
+: "${PROJECT_NAME:?The PROJECT_NAME variable has not been set.}"
+: "${FIRST_TIME:?The FIRST_TIME variable has not been set.}"
+
+export SERVICE_NAME="${PROJECT_NAME}-pr-${PR_NUMBER}"
+export HOSTNAME="${PROJECT_NAME}-pr-${PR_NUMBER}.preview.carlosalexandre.com.br"
+export ROUTER_NAME="${PROJECT_NAME}-pr-${PR_NUMBER}"
+
+trap 'echo "--- docker compose ps ---"; docker compose -f compose.preview.yaml -p ${SERVICE_NAME} ps || true; echo "--- docker compose logs (last 200 lines) ---"; docker compose -f compose.preview.yaml -p ${SERVICE_NAME} logs --no-color --tail=200 || true' ERR
+
+echo "Starting deployment for PR #${PR_NUMBER}..."
+
+if $FIRST_TIME; then
+  cp .env.preview .env
+  sed -i "s#^APP_URL=.*#APP_URL=https://${HOSTNAME}#" .env
+
+  KEY=$(openssl rand -base64 32 | sed 's/^/base64:/')
+  sed -i "s#^APP_KEY=.*#APP_KEY=${KEY}#" .env
+
+  ln -s ~/.htpasswd ./docker/nginx/.htpasswd || true
+fi
+
+echo "Updating repository to commit ${COMMIT_SHA}..."
+git fetch origin
+git checkout "${COMMIT_SHA}"
+
+docker compose -f compose.preview.yaml -p "${SERVICE_NAME}" pull app
+
+echo "Starting containers with image ${IMAGE_TAG}..."
+docker compose -f compose.preview.yaml -p "${SERVICE_NAME}" up -d --wait --pull=always
+
+docker compose -f compose.preview.yaml -p "${SERVICE_NAME}" up -d --no-deps nginx --force-recreate
+
+echo "Running migrations..."
+if ! docker compose -f compose.preview.yaml -p "${SERVICE_NAME}" exec -T app php artisan migrate --force; then
+  echo "Migrations failed, retrying in 5s..."
+  sleep 5
+  docker compose -f compose.preview.yaml -p "${SERVICE_NAME}" exec -T app php artisan migrate --force
+fi
+echo "✅ Migrations completed."
+
+echo "Checking HTTP readiness for https://${HOSTNAME}/health ..."
+READY_TIMEOUT=120
+while true; do
+  HTTP_CODE=$(curl -k -sS -o /dev/null -w "%{http_code}" --max-time 5 "https://${HOSTNAME}/health")
+  if [ "$HTTP_CODE" -eq 200 ]; then
+    echo "✅ Readiness OK (200) at ${HOSTNAME}."
+    break
+  else
+    sleep 2
+    READY_TIMEOUT=$((READY_TIMEOUT-2))
+    if [ $READY_TIMEOUT -le 0 ]; then
+      echo "Error: HTTP readiness not achieved. Last code: ${HTTP_CODE}" >&2
+      exit 1
+    fi
+  fi
+done
+
+echo "✅ Preview environment deployed successfully!"
