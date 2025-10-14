@@ -67,6 +67,7 @@ jobs:
             export IMAGE_TAG="${{ github.ref_name }}"
             export PROJECT_NAME=${{ vars.PROJECT_NAME }}
             export PROJECT_DIR=/var/www/$PROJECT_NAME
+            export COMMIT_SHA="${{ github.sha }}"
             
             cd $PROJECT_DIR || exit 1
             
