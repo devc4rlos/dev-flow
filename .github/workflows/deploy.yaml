@@ -67,12 +67,6 @@ jobs:
             export IMAGE_TAG="${{ github.ref_name }}"
             export PROJECT_NAME=${{ vars.PROJECT_NAME }}
             export PROJECT_DIR=/var/www/$PROJECT_NAME
-            export COMMIT_SHA="${{ github.sha }}"
-            
-            export SERVICE_NAME=${PROJECT_NAME}
-            export HOSTNAME="${PROJECT_NAME}.carlosalexandre.com.br"
-            export ROUTER_NAME="${PROJECT_NAME}"
-            export COMPOSE_FILE="compose.production.yaml"
             
             cd $PROJECT_DIR || exit 1
             
