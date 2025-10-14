@@ -3,7 +3,6 @@ set -euo pipefail
 
 : "${PR_NUMBER:?The PR_NUMBER variable has not been set.}"
 : "${IMAGE_TAG:?The IMAGE_TAG variable has not been set.}"
-: "${COMMIT_SHA:?The COMMIT_SHA variable has not been set.}"
 : "${PROJECT_DIR:?The PROJECT_DIR variable has not been set.}"
 : "${PROJECT_NAME:?The PROJECT_NAME variable has not been set.}"
 : "${FIRST_TIME:?The FIRST_TIME variable has not been set.}"
@@ -25,10 +24,6 @@ if $FIRST_TIME; then
 
   ln -s ~/.htpasswd ./docker/nginx/.htpasswd || true
 fi
-
-echo "Updating repository to commit ${COMMIT_SHA}..."
-git fetch origin
-git checkout "${COMMIT_SHA}"
 
 docker compose -f compose.preview.yaml -p "${SERVICE_NAME}" pull app
 
