@@ -54,7 +54,7 @@ jobs:
           sed -i "s|APP_KEY=.*|APP_KEY=${APP_KEY_CI}|" .env
           export $(grep -v '^#' .env | xargs)
           
-          export IMAGE_NAME=my-app/laravel:test
+          export IMAGE_NAME=${{ env.IMAGE_NAME }}
 
           $DOCKER_COMPOSE up -d --wait
           
