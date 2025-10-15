@@ -9,6 +9,9 @@ on:
 permissions:
   contents: read
 
+env:
+  IMAGE_NAME: my-app/laravel:test
+
 jobs:
   laravel-tests-reusable:
     runs-on: ubuntu-24.04
@@ -23,7 +26,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          tags: my-app/laravel:test
+          tags: ${{ env.IMAGE_NAME }}
           load: true
           build-args: |
             COMPOSER_CACHE_VERSION=${{ hashFiles('composer.lock') }}
@@ -50,6 +53,8 @@ jobs:
           
           sed -i "s|APP_KEY=.*|APP_KEY=${APP_KEY_CI}|" .env
           export $(grep -v '^#' .env | xargs)
+          
+          export IMAGE_NAME=my-app/laravel:test
 
           $DOCKER_COMPOSE up -d --wait
           
