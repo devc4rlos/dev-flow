@@ -1,0 +1,76 @@
+name: "Deploy Preview"
+
+on:
+  workflow_call:
+    inputs:
+      pr_number:
+        required: true
+        type: string
+      commit_sha:
+        required: true
+        type: string
+      project_name:
+        required: true
+        type: string
+      repo_full_name:
+        required: true
+        type: string
+      domain_preview:
+        required: true
+        type: string
+
+    secrets:
+      VPS_HOST:
+        required: true
+      VPS_USER:
+        required: true
+      VPS_SSH_KEY:
+        required: true
+
+permissions:
+  pull-requests: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: Preview
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            export REPO_FULL_NAME=${{ inputs.repo_full_name }}
+            export PR_NUMBER=${{ inputs.pr_number }}
+            export COMMIT_SHA=${{ inputs.commit_sha }}
+            export PROJECT_NAME=${{ inputs.project_name }}
+            export IMAGE_TAG=pr-${{ inputs.pr_number }}
+            export PROJECT_DIR=/var/www/$PROJECT_NAME/previews/pr-${{ inputs.pr_number }}
+            export FIRST_TIME=false
+
+            if [ ! -d "$PROJECT_DIR" ]; then
+              export FIRST_TIME=true
+              echo "Cloning repository for the first time at ${PROJECT_DIR}..."
+              git clone "git@github.com:${REPO_FULL_NAME}.git" "${PROJECT_DIR}"
+            fi
+
+            cd "${PROJECT_DIR}"
+
+            git fetch origin
+            git checkout "${COMMIT_SHA}"
+
+            bash $PROJECT_DIR/deploy/preview/deploy-preview.sh
+
+      - name: Post Preview URL to PR
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          number: ${{ inputs.pr_number }}
+          header: preview-url
+          message: |
+            ✅ **Preview ready!**
+            Access it at: https://${{ inputs.project_name }}-pr-${{ inputs.pr_number }}.preview.${{ inputs.domain_preview }}
+
+            > Image: `${{ inputs.repo_full_name }}:pr-${{ inputs.pr_number }}`
