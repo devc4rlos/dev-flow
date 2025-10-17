@@ -74,7 +74,6 @@ jobs:
       VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
 
   destroy-preview:
-    runs-on: ubuntu-latest
     if: |
       (
         contains(vars.ALLOWED_AUTHOR_ASSOCIATIONS, github.event.pull_request.author_association)
@@ -86,35 +85,14 @@ jobs:
         github.event.action == 'closed'
         || (github.event.action == 'unlabeled' && github.event.label.name == vars.DEPLOY_PREVIEW_LABEL)
       )
-    environment:
-      name: Preview
-    steps:
-      - name: Destroy Environment on VPS
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script: |
-            export PR_NUMBER=${{ env.PR_NUMBER }}
-            export PROJECT_NAME=${{ vars.PROJECT_NAME }}
-            export PROJECT_DIR=/var/www/$PROJECT_NAME/previews/pr-${{ env.PR_NUMBER }}
-            
-            if [ -d "$PROJECT_DIR" ]; then
-              cat $PROJECT_DIR/deploy/preview/destroy-preview.sh | bash -s
-            else
-              echo "Project directory not found. Nothing to do."
-            fi
-
-      - name: Install and Login to regctl
-        run: |
-          curl -L https://github.com/regclient/regclient/releases/latest/download/regctl-linux-amd64 -o /usr/local/bin/regctl
-          chmod +x /usr/local/bin/regctl
-          regctl registry login docker.io -u "${{ secrets.DOCKERHUB_USERNAME }}" -p "${{ secrets.DOCKERHUB_TOKEN }}"
-
-      - name: Delete PR-prefixed tag from Docker Hub
-        run: |
-          REPO="docker.io/${{ github.repository }}"
-          PR_TAG="pr-${{ env.PR_NUMBER }}"
-          echo "Removing PR tag: ${PR_TAG}"
-          regctl tag rm "${REPO}:${PR_TAG}" || echo "Tag ${PR_TAG} not found."
+    uses: ./.github/workflows/reusable-destroy-preview.yaml
+    with:
+      pr_number: ${{ github.event.pull_request.number }}
+      project_name: ${{ vars.PROJECT_NAME }}
+      repo_full_name: ${{ github.repository }}
+    secrets:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
