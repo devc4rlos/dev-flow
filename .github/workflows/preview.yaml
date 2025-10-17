@@ -15,6 +15,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print debug info
+        run: |
+          echo "Action: ${{ github.event.action }}"
+          echo "Labels: ${{ toJSON(github.event.pull_request.labels.*.name) }}"
+          echo "Author Association: ${{ github.event.pull_request.author_association }}"
+          echo "Repo Full Name: ${{ github.event.pull_request.head.repo.full_name }}"
+          echo "Base Repo: ${{ github.repository }}"
+
   laravel-tests:
     uses: ./.github/workflows/reusable-ci.yaml
     if: |
