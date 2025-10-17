@@ -18,7 +18,6 @@ on:
       domain_preview:
         required: true
         type: string
-
     secrets:
       VPS_HOST:
         required: true
@@ -32,7 +31,7 @@ permissions:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment:
       name: Preview
     steps:
@@ -70,7 +69,7 @@ jobs:
           number: ${{ inputs.pr_number }}
           header: preview-url
           message: |
-            ✅ **Preview ready!**
+            **Preview ready!**
             Access it at: https://${{ inputs.project_name }}-pr-${{ inputs.pr_number }}.preview.${{ inputs.domain_preview }}
 
             > Image: `${{ inputs.repo_full_name }}:pr-${{ inputs.pr_number }}`
