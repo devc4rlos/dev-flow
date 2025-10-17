@@ -45,7 +45,7 @@ jobs:
       APP_KEY_CI: ${{ secrets.APP_KEY_CI }}
 
   build-image:
-    uses: ./.github/workflows/preview/build-preview.yaml
+    uses: ./.github/workflows/reusable-build-preview.yaml
     needs: [ laravel-tests ]
     with:
       pr_number: ${{ github.event.pull_request.number }}
