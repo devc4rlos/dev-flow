@@ -1,0 +1,61 @@
+name: "Destroy Preview"
+
+on:
+  workflow_call:
+    inputs:
+      pr_number:
+        required: true
+        type: string
+      project_name:
+        required: true
+        type: string
+      repo_full_name:
+        required: true
+        type: string
+    secrets:
+      VPS_HOST:
+        required: true
+      VPS_USER:
+        required: true
+      VPS_SSH_KEY:
+        required: true
+      DOCKERHUB_USERNAME:
+        required: true
+      DOCKERHUB_TOKEN:
+        required: true
+
+jobs:
+  destroy:
+    runs-on: ubuntu-24.04
+    environment:
+      name: Preview
+    steps:
+      - name: Destroy Environment on VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            export PR_NUMBER=${{ inputs.pr_number }}
+            export PROJECT_NAME=${{ inputs.project_name }}
+            export PROJECT_DIR=/var/www/$PROJECT_NAME/previews/pr-${{ inputs.pr_number }}
+            
+            if [ -d "$PROJECT_DIR" ]; then
+              cat $PROJECT_DIR/deploy/preview/destroy-preview.sh | bash -s
+            else
+              echo "Project directory not found. Nothing to do."
+            fi
+
+      - name: Install and Login to regctl
+        run: |
+          curl -L https://github.com/regclient/regclient/releases/latest/download/regctl-linux-amd64 -o /usr/local/bin/regctl
+          chmod +x /usr/local/bin/regctl
+          regctl registry login docker.io -u "${{ secrets.DOCKERHUB_USERNAME }}" -p "${{ secrets.DOCKERHUB_TOKEN }}"
+
+      - name: Delete PR-prefixed tag from Docker Hub
+        run: |
+          REPO="docker.io/${{ inputs.repo_full_name }}"
+          PR_TAG="pr-${{ inputs.pr_number }}"
+          echo "Removing PR tag: ${PR_TAG}"
+          regctl tag rm "${REPO}:${PR_TAG}" || echo "Tag ${PR_TAG} not found."
