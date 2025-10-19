@@ -45,29 +45,29 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            export REPO_FULL_NAME=${{ inputs.repo_full_name }}
-            export PR_NUMBER=${{ inputs.pr_number }}
-            export COMMIT_SHA=${{ inputs.commit_sha }}
-            export PROJECT_NAME=${{ inputs.project_name }}
-            export IMAGE_TAG=pr-${{ inputs.pr_number }}
-            export PROJECT_DIR=/var/www/$PROJECT_NAME/previews/pr-${{ inputs.pr_number }}
-            export FIRST_TIME=false
-            export DOMAIN_PREVIEW=${{ inputs.domain_preview }}
+            export SERVICE_NAME="${{ inputs.project_name }}-pr-${{ inputs.pr_number }}"
+            export HOSTNAME="${{ inputs.project_name }}-pr-${{ inputs.pr_number }}.preview.${{ inputs.domain_preview }}"
+            export ROUTER_NAME="${{ inputs.project_name }}-pr-${{ inputs.pr_number }}"
             export IMAGE_NAME=${{ inputs.repo_full_name }}:pr-${{ inputs.pr_number }}
             export LABEL_PREVIEW=${{ inputs.label_preview }}
+            export FIRST_PREVIEW=false
+            
+            PROJECT_DIR=/var/www/${{ inputs.project_name }}/previews/pr-${{ inputs.pr_number }}
 
             if [ ! -d "$PROJECT_DIR" ]; then
-              export FIRST_TIME=true
+              export FIRST_PREVIEW=true
               echo "Cloning repository for the first time at ${PROJECT_DIR}..."
-              git clone "git@github.com:${REPO_FULL_NAME}.git" "${PROJECT_DIR}"
+              git clone "git@github.com:${{ inputs.repo_full_name }}.git" "${PROJECT_DIR}"
             fi
 
             cd "${PROJECT_DIR}"
 
             git fetch origin
-            git checkout "${COMMIT_SHA}"
+            git checkout "${{ inputs.commit_sha }}"
 
+            echo "Starting deployment for PR #${{ inputs.pr_number }}..."
             bash $PROJECT_DIR/deploy/preview/deploy-preview.sh
+            echo "Deployment for PR #${{ inputs.pr_number }} finished."
 
       - name: Post Preview URL to PR
         uses: marocchino/sticky-pull-request-comment@v2
