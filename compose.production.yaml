@@ -24,7 +24,7 @@ services:
       - "traefik.docker.network=proxy"
 
   app:
-    image: devc4rlos/dev-flow:${IMAGE_TAG:-latest}
+    image: ${IMAGE_NAME}
     restart: unless-stopped
     depends_on:
       mysql:
@@ -64,10 +64,10 @@ volumes:
   app-public-data:
   storage_data:
     external: true
-    name: dev-flow-production-storage-data
+    name: ${PROJECT_NAME}-production-storage-data
   db-data:
     external: true
-    name: dev-flow-production-db-data
+    name: ${PROJECT_NAME}-production-db-data
 
 networks:
   default:

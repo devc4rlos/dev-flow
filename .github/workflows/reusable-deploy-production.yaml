@@ -12,12 +12,17 @@ on:
       tag:
         required: true
         type: string
+      domain_production:
+        required: true
+        type: string
     secrets:
       VPS_HOST:
         required: true
       VPS_USER:
         required: true
       VPS_SSH_KEY:
+        required: true
+      DOCKERHUB_USERNAME:
         required: true
 
 permissions:
@@ -36,14 +41,19 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            export IMAGE_TAG="${{ inputs.tag }}"
+            export SERVICE_NAME="${{ inputs.project_name }}"
+            export HOSTNAME="${{ inputs.project_name }}.${{ inputs.domain_production }}"
+            export ROUTER_NAME="${{ inputs.project_name }}"
+            export IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/${{ inputs.project_name }}:${{ inputs.tag }}
             export PROJECT_NAME=${{ inputs.project_name }}
-            export PROJECT_DIR=/var/www/${{ inputs.project_name }}
-            export COMMIT_SHA="${{ inputs.commit_sha }}"
             
+            PROJECT_DIR=/var/www/${{ inputs.project_name }}
+
             cd $PROJECT_DIR || exit 1
-            
+
             git fetch origin
-            git checkout "${COMMIT_SHA}"
-            
+            git checkout "${{ inputs.commit_sha }}"
+
+            echo "Starting deployment for production..."
             bash $PROJECT_DIR/deploy/production/deploy-production.sh
+            echo "Deployment for production finished."
