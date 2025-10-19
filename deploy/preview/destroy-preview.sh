@@ -1,20 +1,12 @@
 #!/bin/bash
 set -euo pipefail
 
-: "${PR_NUMBER:?The PR_NUMBER variable has not been set.}"
-: "${PROJECT_DIR:?The PROJECT_DIR variable has not been set.}"
+: "${SERVICE_NAME:?The SERVICE_NAME variable has not been set.}"
+: "${HOSTNAME:?The HOSTNAME variable has not been set.}"
+: "${ROUTER_NAME:?The ROUTER_NAME variable has not been set.}"
+: "${IMAGE_NAME:?The IMAGE_NAME variable has not been set.}"
+: "${LABEL_PREVIEW:?The LABEL_PREVIEW variable has not been set.}"
 : "${PROJECT_NAME:?The PROJECT_NAME variable has not been set.}"
-
-export SERVICE_NAME="${PROJECT_NAME}-pr-${PR_NUMBER}"
-export HOSTNAME="${PROJECT_NAME}-pr-${PR_NUMBER}.preview.carlosalexandre.com.br"
-export ROUTER_NAME="${PROJECT_NAME}-pr-${PR_NUMBER}"
-
-echo "Starting teardown of environment for PR #${PR_NUMBER}..."
-
-if [ ! -d "$PROJECT_DIR" ]; then
-  echo "Project directory ${PROJECT_DIR} not found. Nothing to do."
-  exit 0
-fi
 
 cd "${PROJECT_DIR}"
 
@@ -32,7 +24,7 @@ cd ..
 rm -rf "${PROJECT_DIR}"
 
 echo "Removing Docker images labeled with this PR on the server..."
-IMAGES_TO_DELETE=$(docker images -q --filter "label=br.com.carlosalexandre.preview.pr-${ROUTER_NAME}=${PR_NUMBER}")
+IMAGES_TO_DELETE=$(docker images -q --filter "label=${LABEL_PREVIEW}.preview.pr-${ROUTER_NAME}=true")
 if [ -n "$IMAGES_TO_DELETE" ]; then
   docker rmi "$IMAGES_TO_DELETE" || true
 else
@@ -49,5 +41,3 @@ for NET in $(docker network ls --format '{{.Name}}' | grep "^${SERVICE_NAME}"); 
     docker network rm "$NET" || true
   fi
 done
-
-echo "✅ PR environment #${PR_NUMBER} successfully destroyed."
