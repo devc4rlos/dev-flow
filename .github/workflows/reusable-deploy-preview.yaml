@@ -18,6 +18,9 @@ on:
       domain_preview:
         required: true
         type: string
+      label_preview:
+        required: true
+        type: string
     secrets:
       VPS_HOST:
         required: true
@@ -51,6 +54,7 @@ jobs:
             export FIRST_TIME=false
             export DOMAIN_PREVIEW=${{ inputs.domain_preview }}
             export IMAGE_NAME=${{ inputs.repo_full_name }}:pr-${{ inputs.pr_number }}
+            export LABEL_PREVIEW=${{ inputs.label_preview }}
 
             if [ ! -d "$PROJECT_DIR" ]; then
               export FIRST_TIME=true
