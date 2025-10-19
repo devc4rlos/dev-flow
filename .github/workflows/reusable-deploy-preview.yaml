@@ -49,6 +49,8 @@ jobs:
             export IMAGE_TAG=pr-${{ inputs.pr_number }}
             export PROJECT_DIR=/var/www/$PROJECT_NAME/previews/pr-${{ inputs.pr_number }}
             export FIRST_TIME=false
+            export DOMAIN_PREVIEW=${{ inputs.domain_preview }}
+            export IMAGE_NAME=${{ inputs.repo_full_name }}:pr-${{ inputs.pr_number }}
 
             if [ ! -d "$PROJECT_DIR" ]; then
               export FIRST_TIME=true
