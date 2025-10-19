@@ -1,0 +1,59 @@
+name: "Deploy Production"
+
+on:
+  workflow_call:
+    inputs:
+      commit_sha:
+        required: true
+        type: string
+      project_name:
+        required: true
+        type: string
+      tag:
+        required: true
+        type: string
+      domain_production:
+        required: true
+        type: string
+    secrets:
+      VPS_HOST:
+        required: true
+      VPS_USER:
+        required: true
+      VPS_SSH_KEY:
+        required: true
+      DOCKERHUB_USERNAME:
+        required: true
+
+permissions:
+  pull-requests: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    environment:
+      name: Production
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            export SERVICE_NAME="${{ inputs.project_name }}"
+            export HOSTNAME="${{ inputs.project_name }}.${{ inputs.domain_production }}"
+            export ROUTER_NAME="${{ inputs.project_name }}"
+            export IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/${{ inputs.project_name }}:${{ inputs.tag }}
+            export PROJECT_NAME=${{ inputs.project_name }}
+            
+            PROJECT_DIR=/var/www/${{ inputs.project_name }}
+
+            cd $PROJECT_DIR || exit 1
+
+            git fetch origin
+            git checkout "${{ inputs.commit_sha }}"
+
+            echo "Starting deployment for production..."
+            bash $PROJECT_DIR/deploy/production/deploy-production.sh
+            echo "Deployment for production finished."
