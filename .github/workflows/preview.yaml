@@ -78,6 +78,7 @@ jobs:
       project_name: ${{ vars.PROJECT_NAME }}
       repo_full_name: ${{ github.repository }}
       domain_preview: ${{ vars.DOMAIN_PREVIEW }}
+      label_preview: ${{ vars.LABEL_PREVIEW }}
     secrets:
       VPS_HOST: ${{ secrets.VPS_HOST }}
       VPS_USER: ${{ secrets.VPS_USER }}
