@@ -194,9 +194,9 @@ graph TD
 3.  To validate the changes in a real-world environment, the developer adds the `deploy-preview` *label*.
 4.  The **Preview** workflow (`preview.yaml`) is triggered:
     * Runs the tests again.
-    * Builds and pushes an image like `my-app:pr-123` to Docker Hub.
+    * Builds and pushes an image like `your-username/my-project:pr-123` to Docker Hub.
     * Connects to the server and runs `deploy-preview.sh`, which uses `compose.preview.yaml` to spin up the environment.
-    * Posts a comment on the PR with the URL: `https://my-project-pr-123.preview.carlosalexandre.com.br`.
+    * Posts a comment on the PR with the URL: `https://my-project-pr-123.preview.your-domain.com`.
 5.  After approval and merge, the PR is closed.
 6.  Closing the PR triggers the destroy step, which removes all resources from the server and the image from Docker Hub.
 
@@ -206,7 +206,7 @@ graph TD
 2.  The command `git tag v1.1.0 && git push origin v1.1.0` is executed.
 3.  The **Deploy** workflow (`deploy.yaml`) is triggered:
     * Runs the tests.
-    * Builds and pushes the `my-app:v1.1.0` image to Docker Hub.
+    * Builds and pushes the `your-username/my-project:v1.1.0` image to Docker Hub.
     * Connects to the production server and runs `deploy-production.sh`, which uses `compose.production.yaml` to update the application.
 
 -----
@@ -227,26 +227,28 @@ Configure the following `Variables` and `Secrets` in your GitHub repository (`Se
 
 #### Repository Secrets
 
-| Name               | Description                                           | Example                 |
-| ------------------ | ----------------------------------------------------- | ----------------------- |
-| `VPS_HOST`         | The IP address or domain of your deployment server.   | `192.168.1.1`           |
-| `VPS_USER`         | The SSH user to connect to the server.                | `dev-flow`              |
-| `VPS_SSH_KEY`      | The private SSH key for authentication on the server. | `-----BEGIN OPENSSH...` |
+| Name                 | Description                                           | Example                 |
+|----------------------|-------------------------------------------------------|-------------------------|
+| `VPS_HOST`           | The IP address or domain of your deployment server.   | `192.168.1.1`           |
+| `VPS_USER`           | The SSH user to connect to the server.                | `dev-flow`              |
+| `VPS_SSH_KEY`        | The private SSH key for authentication on the server. | `-----BEGIN OPENSSH...` |
 | `DOCKERHUB_USERNAME` | Your Docker Hub username.                             | `my-username`           |
-| `DOCKERHUB_TOKEN`  | Your Docker Hub access token.                         | `dckr_pat_...`          |
-| `APP_KEY_CI`       | A Laravel `APP_KEY` for running tests.                | `base64:Abcde...`       |
+| `DOCKERHUB_TOKEN`    | Your Docker Hub access token.                         | `dckr_pat_...`          |
+| `APP_KEY_CI`         | A Laravel `APP_KEY` for running tests.                | `base64:Abcde...`       |
 
 #### Repository Variables
 
-| Name                        | Description                                          | Example           |
-| --------------------------- | ---------------------------------------------------- | ----------------- |
-| `PROJECT_NAME`              | Project name, used for domains and service names.    | `my-project`      |
-| `DEPLOY_PREVIEW_LABEL`      | The *label* that triggers the preview deployment.    | `deploy-preview`  |
-| `ALLOWED_AUTHOR_ASSOCIATIONS` | Allowed author associations to trigger the preview.  | `MEMBER,OWNER`    |
+| Name                          | Description                                         | Example               |
+|-------------------------------|-----------------------------------------------------|-----------------------|
+| `PROJECT_NAME`                | Project name, used for domains and service names.   | `my-project`          |
+| `DOMAIN_PREVIEW`              | Base domain used for preview environments.          | `preview.example.com` |
+| `DOMAIN_PRODUCTION`           | Base domain used for the production environment.    | `example.com`         |
+| `DEPLOY_PREVIEW_LABEL`        | The *label* that triggers the preview deployment.   | `deploy-preview`      |
+| `ALLOWED_AUTHOR_ASSOCIATIONS` | Allowed author associations to trigger the preview. | `MEMBER,OWNER`        |
 
 ### 3\. Server Configuration
 
-* Create the external volumes for production `myproject-production-db-data` and `myproject-production-storage-data` (e.g., `docker volume create myproject-production-db-data`).
+* Create the external volumes for production using the format `${PROJECT_NAME}-production-db-data` and `${PROJECT_NAME}-production-storage-data`. For example: `docker volume create my-project-production-db-data`.
 * Clone the repository to the location defined in `PROJECT_DIR`.
 * Ensure that Traefik is running and connected to the external `proxy` network.
 
