@@ -1,0 +1,49 @@
+name: "Deploy Production"
+
+on:
+  workflow_call:
+    inputs:
+      commit_sha:
+        required: true
+        type: string
+      project_name:
+        required: true
+        type: string
+      tag:
+        required: true
+        type: string
+    secrets:
+      VPS_HOST:
+        required: true
+      VPS_USER:
+        required: true
+      VPS_SSH_KEY:
+        required: true
+
+permissions:
+  pull-requests: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    environment:
+      name: Production
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            export IMAGE_TAG="${{ inputs.tag }}"
+            export PROJECT_NAME=${{ inputs.project_name }}
+            export PROJECT_DIR=/var/www/${{ inputs.project_name }}
+            export COMMIT_SHA="${{ inputs.commit_sha }}"
+            
+            cd $PROJECT_DIR || exit 1
+            
+            git fetch origin
+            git checkout "${COMMIT_SHA}"
+            
+            bash $PROJECT_DIR/deploy/production/deploy-production.sh
