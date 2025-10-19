@@ -6,6 +6,7 @@ set -euo pipefail
 : "${ROUTER_NAME:?The ROUTER_NAME variable has not been set.}"
 : "${IMAGE_NAME:?The IMAGE_NAME variable has not been set.}"
 : "${LABEL_PREVIEW:?The LABEL_PREVIEW variable has not been set.}"
+: "${PROJECT_NAME:?The PROJECT_NAME variable has not been set.}"
 : "${FIRST_PREVIEW:?The FIRST_PREVIEW variable has not been set.}"
 
 trap 'echo "--- docker compose ps ---"; docker compose -f compose.preview.yaml -p ${SERVICE_NAME} ps || true; echo "--- docker compose logs (last 200 lines) ---"; docker compose -f compose.preview.yaml -p ${SERVICE_NAME} logs --no-color --tail=200 || true' ERR

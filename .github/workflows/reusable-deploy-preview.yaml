@@ -50,6 +50,7 @@ jobs:
             export ROUTER_NAME="${{ inputs.project_name }}-pr-${{ inputs.pr_number }}"
             export IMAGE_NAME=${{ inputs.repo_full_name }}:pr-${{ inputs.pr_number }}
             export LABEL_PREVIEW=${{ inputs.label_preview }}
+            export PROJECT_NAME=${{ inputs.project_name }}
             export FIRST_PREVIEW=false
             
             PROJECT_DIR=/var/www/${{ inputs.project_name }}/previews/pr-${{ inputs.pr_number }}
