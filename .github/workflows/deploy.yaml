@@ -32,7 +32,7 @@ jobs:
       commit_sha: ${{ github.sha }}
       project_name: ${{ vars.PROJECT_NAME }}
       tag: ${{ github.ref_name }}
-      domain_production: ${{ vars.DOMAIN_PRODUCTION }}
+      hostname: ${{ vars.HOSTNAME }}
     secrets:
       VPS_HOST: ${{ secrets.VPS_HOST }}
       VPS_USER: ${{ secrets.VPS_USER }}

@@ -12,7 +12,7 @@ on:
       tag:
         required: true
         type: string
-      domain_production:
+      hostname:
         required: true
         type: string
     secrets:
@@ -39,7 +39,7 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             export SERVICE_NAME="${{ inputs.project_name }}"
-            export HOSTNAME="${{ inputs.project_name }}.${{ inputs.domain_production }}"
+            export HOSTNAME="${{ inputs.hostname }}"
             export ROUTER_NAME="${{ inputs.project_name }}"
             export IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/${{ inputs.project_name }}:${{ inputs.tag }}
             export PROJECT_NAME=${{ inputs.project_name }}
