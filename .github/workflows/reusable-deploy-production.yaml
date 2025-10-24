@@ -24,6 +24,10 @@ on:
         required: true
       DOCKERHUB_USERNAME:
         required: true
+      ADMIN_EMAIL:
+        required: true
+      ADMIN_PASSWORD:
+        required: true
 
 jobs:
   deploy:
@@ -43,6 +47,8 @@ jobs:
             export ROUTER_NAME="${{ inputs.project_name }}"
             export IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/${{ inputs.project_name }}:${{ inputs.tag }}
             export PROJECT_NAME=${{ inputs.project_name }}
+            export ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
+            export ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
             
             PROJECT_DIR=/var/www/${{ inputs.project_name }}
 
