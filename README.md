@@ -227,14 +227,16 @@ Configure the following `Variables` and `Secrets` in your GitHub repository (`Se
 
 #### Repository Secrets
 
-| Name                 | Description                                           | Example                 |
-|----------------------|-------------------------------------------------------|-------------------------|
-| `VPS_HOST`           | The IP address or domain of your deployment server.   | `192.168.1.1`           |
-| `VPS_USER`           | The SSH user to connect to the server.                | `dev-flow`              |
-| `VPS_SSH_KEY`        | The private SSH key for authentication on the server. | `-----BEGIN OPENSSH...` |
-| `DOCKERHUB_USERNAME` | Your Docker Hub username.                             | `my-username`           |
-| `DOCKERHUB_TOKEN`    | Your Docker Hub access token.                         | `dckr_pat_...`          |
-| `APP_KEY_CI`         | A Laravel `APP_KEY` for running tests.                | `base64:Abcde...`       |
+| Name                 | Description                                                                              | Example                 |
+|----------------------|------------------------------------------------------------------------------------------|-------------------------|
+| `VPS_HOST`           | The IP address or domain of your deployment server.                                      | `192.168.1.1`           |
+| `VPS_USER`           | The SSH user to connect to the server.                                                   | `dev-flow`              |
+| `VPS_SSH_KEY`        | The private SSH key for authentication on the server.                                    | `-----BEGIN OPENSSH...` |
+| `DOCKERHUB_USERNAME` | Your Docker Hub username.                                                                | `my-username`           |
+| `DOCKERHUB_TOKEN`    | Your Docker Hub access token.                                                            | `dckr_pat_...`          |
+| `ADMIN_EMAIL`        | The email for the initial admin user, created on the first deployment of an environment. | `dev@exameple.com`      |
+| `ADMIN_PASSWORD`     | The password for the initial admin user. Must be a strong password.                      | `123456789`             |
+| `APP_KEY_CI`         | A Laravel `APP_KEY` for running tests.                                                   | `base64:Abcde...`       |
 
 #### Repository Variables
 

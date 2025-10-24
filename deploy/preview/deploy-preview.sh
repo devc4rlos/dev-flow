@@ -29,12 +29,14 @@ docker compose -f compose.preview.yaml -p "${SERVICE_NAME}" up -d --wait --pull=
 docker compose -f compose.preview.yaml -p "${SERVICE_NAME}" up -d --no-deps nginx --force-recreate
 
 echo "Running migrations..."
-if ! docker compose -f compose.preview.yaml -p "${SERVICE_NAME}" exec -T app php artisan migrate --force; then
+if ! docker compose -f compose.preview.yaml -p "${SERVICE_NAME}" exec -T app php artisan migrate:fresh --seed --force; then
   echo "Migrations failed, retrying in 5s..."
   sleep 5
-  docker compose -f compose.preview.yaml -p "${SERVICE_NAME}" exec -T app php artisan migrate --force
+  docker compose -f compose.preview.yaml -p "${SERVICE_NAME}" exec -T app php artisan migrate:fresh --seed --force
 fi
 echo "✅ Migrations completed."
+
+docker compose -f compose.preview.yaml -p "${SERVICE_NAME}" exec -T app php artisan app:create-admin-user
 
 echo "Checking HTTP readiness for https://${HOSTNAME}/health ..."
 READY_TIMEOUT=120

@@ -30,6 +30,10 @@ on:
         required: true
       DOCKERHUB_USERNAME:
         required: true
+      ADMIN_EMAIL:
+        required: true
+      ADMIN_PASSWORD:
+        required: true
 
 permissions:
   pull-requests: write
@@ -53,6 +57,8 @@ jobs:
             export IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/${{ inputs.project_name }}:pr-${{ inputs.pr_number }}
             export LABEL_PREVIEW=${{ inputs.label_preview }}
             export PROJECT_NAME=${{ inputs.project_name }}
+            export ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
+            export ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
             export FIRST_PREVIEW=false
             
             PROJECT_DIR=/var/www/${{ inputs.project_name }}/previews/pr-${{ inputs.pr_number }}

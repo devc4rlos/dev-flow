@@ -24,7 +24,7 @@ cd ..
 rm -rf "${PROJECT_DIR}"
 
 echo "Removing Docker images labeled with this PR on the server..."
-IMAGES_TO_DELETE=$(docker images -q --filter "label=${LABEL_PREVIEW}.preview.pr-${ROUTER_NAME}=true")
+IMAGES_TO_DELETE=$(docker images -q --filter "label=${LABEL_PREVIEW}.pr-${ROUTER_NAME}=true")
 if [ -n "$IMAGES_TO_DELETE" ]; then
   docker rmi "$IMAGES_TO_DELETE" || true
 else
