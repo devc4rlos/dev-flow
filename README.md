@@ -238,13 +238,14 @@ Configure the following `Variables` and `Secrets` in your GitHub repository (`Se
 
 #### Repository Variables
 
-| Name                          | Description                                              | Example               |
-|-------------------------------|----------------------------------------------------------|-----------------------|
-| `PROJECT_NAME`                | Project name, used for domains and service names.        | `my-project`          |
-| `DOMAIN_PREVIEW`              | Base domain used for preview environments.               | `preview.example.com` |
-| `HOSTNAME`                    | The full hostname (FQDN) for the production environment. | `app.example.com`     |
-| `DEPLOY_PREVIEW_LABEL`        | The *label* that triggers the preview deployment.        | `deploy-preview`      |
-| `ALLOWED_AUTHOR_ASSOCIATIONS` | Allowed author associations to trigger the preview.      | `MEMBER,OWNER`        |
+| Name                          | Description                                              | Example                     |
+|-------------------------------|----------------------------------------------------------|-----------------------------|
+| `PROJECT_NAME`                | Project name, used for domains and service names.        | `my-project`                |
+| `DOMAIN_PREVIEW`              | Base domain used for preview environments.               | `preview.example.com`       |
+| `LABEL_PREVIEW`               | A label for service discovery and routing.               | `com.example.preview.app`   |
+| `HOSTNAME`                    | The full hostname (FQDN) for the production environment. | `app.example.com`           |
+| `DEPLOY_PREVIEW_LABEL`        | The *label* that triggers the preview deployment.        | `deploy-preview`            |
+| `ALLOWED_AUTHOR_ASSOCIATIONS` | Allowed author associations to trigger the preview.      | `MEMBER,OWNER,COLLABORATOR` |
 
 ### 3\. Server Configuration
 
