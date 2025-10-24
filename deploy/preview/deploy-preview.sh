@@ -36,6 +36,8 @@ if ! docker compose -f compose.preview.yaml -p "${SERVICE_NAME}" exec -T app php
 fi
 echo "✅ Migrations completed."
 
+docker compose -f compose.preview.yaml -p "${SERVICE_NAME}" exec -T app php artisan app:create-admin-user
+
 echo "Checking HTTP readiness for https://${HOSTNAME}/health ..."
 READY_TIMEOUT=120
 while true; do
