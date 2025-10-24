@@ -26,6 +26,8 @@ if ! docker compose -f "${COMPOSE_FILE}" exec -T app php artisan migrate --force
 fi
 echo "Migrations completed."
 
+docker compose -f "${COMPOSE_FILE}" exec -T app php artisan app:create-admin-user
+
 docker image prune -af
 
 echo "Checking HTTP readiness for https://${HOSTNAME}/health ..."
