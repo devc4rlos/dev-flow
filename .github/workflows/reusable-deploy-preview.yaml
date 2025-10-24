@@ -28,6 +28,8 @@ on:
         required: true
       VPS_SSH_KEY:
         required: true
+      DOCKERHUB_USERNAME:
+        required: true
 
 permissions:
   pull-requests: write
@@ -79,4 +81,4 @@ jobs:
             **Preview ready!**
             Access it at: https://${{ inputs.project_name }}-pr-${{ inputs.pr_number }}.${{ inputs.domain_preview }}
 
-            > Image: `${{ inputs.repo_full_name }}:pr-${{ inputs.pr_number }}`
+            > Image: `${{ secrets.DOCKERHUB_USERNAME }}/${{ inputs.project_name }}:pr-${{ inputs.pr_number }}`
