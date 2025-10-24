@@ -46,7 +46,7 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             export SERVICE_NAME="${{ inputs.project_name }}-pr-${{ inputs.pr_number }}"
-            export HOSTNAME="${{ inputs.project_name }}-pr-${{ inputs.pr_number }}.preview.${{ inputs.domain_preview }}"
+            export HOSTNAME="${{ inputs.project_name }}-pr-${{ inputs.pr_number }}.${{ inputs.domain_preview }}"
             export ROUTER_NAME="${{ inputs.project_name }}-pr-${{ inputs.pr_number }}"
             export IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/${{ inputs.project_name }}:pr-${{ inputs.pr_number }}
             export LABEL_PREVIEW=${{ inputs.label_preview }}
@@ -77,6 +77,6 @@ jobs:
           header: preview-url
           message: |
             **Preview ready!**
-            Access it at: https://${{ inputs.project_name }}-pr-${{ inputs.pr_number }}.preview.${{ inputs.domain_preview }}
+            Access it at: https://${{ inputs.project_name }}-pr-${{ inputs.pr_number }}.${{ inputs.domain_preview }}
 
             > Image: `${{ inputs.repo_full_name }}:pr-${{ inputs.pr_number }}`
