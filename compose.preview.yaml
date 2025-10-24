@@ -23,8 +23,8 @@ services:
       - "traefik.http.routers.${ROUTER_NAME}.service=${ROUTER_NAME}"
       - "traefik.http.services.${ROUTER_NAME}.loadbalancer.server.port=80"
       - "traefik.docker.network=proxy"
-      - "${LABEL_PREVIEW}.preview.pr-${ROUTER_NAME}=true"
-      - "${LABEL_PREVIEW}.preview.general-${PROJECT_NAME}=true"
+      - "${LABEL_PREVIEW}.pr-${ROUTER_NAME}=true"
+      - "${LABEL_PREVIEW}.general-${PROJECT_NAME}=true"
 
   app:
     image: ${IMAGE_NAME}
@@ -45,8 +45,8 @@ services:
       retries: 3
       start_period: 30s
     labels:
-      - "${LABEL_PREVIEW}.preview.pr-${ROUTER_NAME}=true"
-      - "${LABEL_PREVIEW}.preview.general-${PROJECT_NAME}=true"
+      - "${LABEL_PREVIEW}.pr-${ROUTER_NAME}=true"
+      - "${LABEL_PREVIEW}.general-${PROJECT_NAME}=true"
 
   mysql:
     image: mysql:8.0
@@ -66,8 +66,8 @@ services:
     networks:
       - default
     labels:
-      - "${LABEL_PREVIEW}.preview.pr-${ROUTER_NAME}=true"
-      - "${LABEL_PREVIEW}.preview.general-${PROJECT_NAME}=true"
+      - "${LABEL_PREVIEW}.pr-${ROUTER_NAME}=true"
+      - "${LABEL_PREVIEW}.general-${PROJECT_NAME}=true"
 
 volumes:
   app-public-data:
